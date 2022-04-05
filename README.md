@@ -97,8 +97,6 @@ nest generate service users
 ```
 Com resultado parecido com o comando para gerar Controllers, realizará a criação dos arquivos `src/users/users.service.spec.ts` e  `src/users/users.service.ts`, também como a atualização do `src/users/users.module.ts`.
 
-
-
 # Injetando a camada Service no Controller
 
 `src/users/users.service.ts`
@@ -138,6 +136,85 @@ export class UsersController {
   @Get(':id')
   getUserById(@Param('id') id: string): any {
     return this.usersService.findById(Number(id));
+  }
+}
+```
+
+## Criando DTO e Entidades
+`src/users/dto/create-user.dto.ts`
+```ts
+export class CreateUserDto {
+  name: string;
+}
+```
+`src/users/entities/user.entity.ts`
+```ts
+export class User {
+  id: number;
+  name: string;
+}
+```
+
+Após a criação de ambos arquivos, vamos adicionar em nossa Service e Controller como dependências.
+Os arquivos ficarão assim:
+
+`src/users/users.controller.ts`
+```ts
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) { }
+
+  @Get()
+  getUsers(): User[] {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  getUserById(@Param('id') id: string): User {
+    return this.usersService.findById(Number(id));
+  }
+
+  @Post()
+  createUser(@Body() body: CreateUserDto): User {
+    return this.usersService.create(body);
+  }
+}
+
+```
+
+`src/users/user.service.ts`
+```ts
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+
+@Injectable()
+export class UsersService {
+
+  private users: User[] = [{ id: 0, name: 'John' }, { id: 1, name: 'Mary' }];
+
+
+  findAll(): User[] {
+    return this.users;
+  }
+
+  findById(userId: number) {
+    return this.users.find(user => user.id === userId);
+  }
+
+  create(createUserDto: CreateUserDto): User {
+    const user = { id: this.getNextId(), ...createUserDto };
+    this.users.push(user);
+    return user;
+  }
+
+  getNextId(): number {
+    return this.users[this.users.length - 1].id + 1;
   }
 }
 ```
