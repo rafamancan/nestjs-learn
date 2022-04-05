@@ -101,31 +101,43 @@ Com resultado parecido com o comando para gerar Controllers, realizará a criaç
 
 # Injetando a camada Service no Controller
 
+`src/users/users.service.ts`
 ```ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class UsersService {
+
+  private users: any = [{ id: 0, name: 'John' }, { id: 1, name: 'Mary' }];
+
+
+  findAll(): any {
+    return this.users;
+  }
+
+  findById(userId: number) {
+    return this.users.find(user => user.id === userId);
+  }
+}
 ```
+
+`src/users/users.controller.ts`
 ```ts
 import { Controller, Get, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-    /**
-     *  aqui estamos fazendo uma injeção de dependência
-     * uma vez que declaramos a UsersService no método contrutor
-     * ela poderá ser utilizada em todos os métodos dessa classe
-     **/
-    constructor(private userService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
-    @Get()
-    getUsers(): any {
-        return [{ id: 0 }];
-    }
+  @Get()
+  getUsers(): string {
+    return this.usersService.findAll();
+  }
 
-    @Get(':id')
-    getUserByid(@Param('id') id: string): any {
-        return {
-
-        }
-    }
+  @Get(':id')
+  getUserById(@Param('id') id: string): any {
+    return this.usersService.findById(Number(id));
+  }
 }
 ```
