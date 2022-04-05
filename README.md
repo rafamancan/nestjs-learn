@@ -218,3 +218,40 @@ export class UsersService {
   }
 }
 ```
+
+# Swagger
+Aqui iniciará a parte de documentação do nosso projeto.
+Para instalar basta executar o comando a seguir:
+```
+yarn add @nestjs/swagger swagger-ui-express
+```
+
+Para configurarmos a documentação iremos alterar o arquivo:
+`src/main.ts`
+
+Ele ficará dessa maneira:
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const config = new DocumentBuilder()
+    .setTitle('NestJS API')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    .addTag('api')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('doc', app, document);
+
+  await app.listen(3000);
+}
+bootstrap();
+
+```
+
+Após a configuração basta acessar a url `http://localhost:3000/doc`
