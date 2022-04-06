@@ -373,3 +373,71 @@ Nesse caso iremos adicionar uma verificação simples ao buscar o usuário, incl
   }
 // ...
 ```
+
+# Pipes
+Vamos utilizar para transformar os dados que chegam na nossa API, para que não haja a necessidade de converter QueryParams toda vez que precisamos manipular
+Para isso precisamos instalar as seguintes dependências:
+
+`yarn add class-validator class-transformer`
+
+[Documentação do class-validator](https://github.com/typestack/class-validator)
+
+Iremos adicionar no arquivo `src/main.ts` as dependências e iniciar sua configuração, o arquivo ficará da seguinte maneira:
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe());
+
+  const config = new DocumentBuilder()
+    .setTitle('NestJS API')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    .addTag('api')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('doc', app, document);
+
+  await app.listen(3000);
+}
+bootstrap();
+
+```
+
+Para adicionar as regras nesse caso iremos especificar em nosso DTO que o nome do usuário precisa ter no máximo 20 caracteres e apenas AlfaNuméricos.
+
+`src/users/dto/create-user.dto.ts`
+```ts
+import { ApiProperty } from '@nestjs/swagger';
+import { IsAlphanumeric, MaxLength } from 'class-validator';
+
+export class CreateUserDto {
+  @ApiProperty()
+  @IsAlphanumeric()
+  @MaxLength(20)
+  name: string;
+}
+```
+
+Uma vez que colocamos essas suas validações, precisamos alterar em nosso controller também o tipo de resposta caso o parâmetro name não esteja de acordo:
+
+`src/users/users.controller.ts`
+```ts
+// ...
+
+  @ApiCreatedResponse({ type: User })
+  @ApiBadRequestResponse()
+  @Post()
+  createUser(@Body() body: CreateUserDto): User {
+    return this.usersService.create(body);
+  }
+// ...
+```
