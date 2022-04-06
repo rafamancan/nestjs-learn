@@ -320,7 +320,7 @@ export class User {
 Atualize a página: `http://localhost:3000/doc` e veja algumas diferenças.
 Uma boa documentação da API é essencial, tanto para clientes externos quanto para equipe de desenvolvimento.
 
-## Query Params
+# Query Params
 Para adicionar query params iremos alterar nosso controller e nossa service.
 
 `src/users/users.controller.ts`
@@ -352,3 +352,24 @@ Para adicionar query params iremos alterar nosso controller e nossa service.
 
 Uma vez que adicionamos a annotation `@ApiQuery({ name: 'name', required: false })` nossa documentação já fica atualizada também.
 
+# Tratando Exceções e Erros
+Nesse caso iremos adicionar uma verificação simples ao buscar o usuário, incluindo sua documentação no Swagger.
+
+`src/users/users.controller.ts`
+```ts
+// ...
+
+  @ApiOkResponse({ type: User, description: 'Returns an user' })
+  @ApiNotFoundResponse()
+  @Get(':id')
+  getUserById(@Param('id') id: string): User {
+    const user = this.usersService.findById(Number(id));
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user;
+  }
+// ...
+```
