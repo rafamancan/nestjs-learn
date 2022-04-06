@@ -441,3 +441,22 @@ Uma vez que colocamos essas suas validações, precisamos alterar em nosso contr
   }
 // ...
 ```
+
+# Usando CLI para gerar um CRUD
+Já podemos notar que a ferramenta CLI do Nest é uma grande amiga no desenvolvimento.
+Imaginaremos um cenário de adicionar um CRUD para Lista de Tarefas, iremos chamar de TODOS.
+
+Execute o comando abaixo:
+`nest g resource todos`
+
+Podemos notas que todos os arquivos já foram criados:
+```
+src/todos/todos.controller.spec.ts
+src/todos/todos.controller.ts
+src/todos/todos.module.ts
+src/todos/todos.service.spec.ts
+src/todos/todos.service.ts
+src/todos/dto/create-todo.dto.ts
+src/todos/dto/update-todo.dto.ts
+src/app.module.ts -> esse foi o único que apenas foi alterado
+```
