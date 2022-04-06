@@ -8,7 +8,10 @@ export class UsersService {
   private users: User[] = [{ id: 0, name: 'John' }, { id: 1, name: 'Mary' }];
 
 
-  findAll(): User[] {
+  findAll(name?: string): User[] {
+    if (name) {
+      return this.users.filter(user => user.name.includes(name));
+    }
     return this.users;
   }
 

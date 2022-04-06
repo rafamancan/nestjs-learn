@@ -320,3 +320,35 @@ export class User {
 Atualize a página: `http://localhost:3000/doc` e veja algumas diferenças.
 Uma boa documentação da API é essencial, tanto para clientes externos quanto para equipe de desenvolvimento.
 
+## Query Params
+Para adicionar query params iremos alterar nosso controller e nossa service.
+
+`src/users/users.controller.ts`
+```ts
+// ...
+
+  @ApiOkResponse({ type: User, isArray: true })
+  @ApiQuery({ name: 'name', required: false })
+  @Get()
+  getUsers(@Query('name') name: string): User[] {
+    return this.usersService.findAll(name);
+  }
+// ...
+```
+
+`src/users/users.service.ts`
+```ts
+// ...
+
+  findAll(name?: string): User[] {
+    if (name) {
+      return this.users.filter(user => user.name.includes(name));
+    }
+    return this.users;
+  }
+
+// ...
+```
+
+Uma vez que adicionamos a annotation `@ApiQuery({ name: 'name', required: false })` nossa documentação já fica atualizada também.
+
