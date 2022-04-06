@@ -241,7 +241,6 @@ async function bootstrap() {
     .setTitle('NestJS API')
     .setDescription('The API description')
     .setVersion('1.0')
-    .addTag('api')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -255,3 +254,69 @@ bootstrap();
 ```
 
 Após a configuração basta acessar a url `http://localhost:3000/doc`
+
+## Aperfeiçoando o uso do Swagger
+`@ApitTags` = cria uma nova seção dentro da documentação
+`@ApiOkResponse` = enriquece as informações sobre o retorno do método
+`@ApiCreatedResponse` = o mesmo que o item acima, porém com status Code para Created.
+`@ApiProperty` = pode ser utilizado na tipagem, sendo dto ou entidade, também enriquece nossa documentação.
+
+Exemplo de como fica o código após a utilização dessas annotations:
+`src/users/users.controller.ts`
+```ts
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger'
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+
+@ApiTags('users')
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) { }
+
+  @ApiOkResponse({ type: User, isArray: true })
+  @Get()
+  getUsers(): User[] {
+    return this.usersService.findAll();
+  }
+
+  @ApiOkResponse({ type: User, description: 'Returns an user' })
+  @Get(':id')
+  getUserById(@Param('id') id: string): User {
+    return this.usersService.findById(Number(id));
+  }
+
+  @ApiCreatedResponse({ type: User })
+  @Post()
+  createUser(@Body() body: CreateUserDto): User {
+    return this.usersService.create(body);
+  }
+}
+```
+
+`src/users/dto/create-user.dto.ts`
+```ts
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateUserDto {
+  @ApiProperty()
+  name: string;
+}
+```
+
+`src/users/entities/user.entity.ts`
+```ts
+import { ApiProperty } from "@nestjs/swagger";
+
+export class User {
+  @ApiProperty()
+  id: number;
+  @ApiProperty()
+  name: string;
+}
+```
+
+Atualize a página: `http://localhost:3000/doc` e veja algumas diferenças.
+Uma boa documentação da API é essencial, tanto para clientes externos quanto para equipe de desenvolvimento.
+
